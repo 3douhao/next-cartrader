@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 const Nav = styled.nav`
   display: flex;
   font-size: 2rem;
-  background: gray;
+  background: #f5f5f5;
   width: 100vw;
   height: 50px;
   justify-content: space-between;
@@ -54,10 +54,24 @@ const Navbar = () => {
           </a>
         </li>
         <li>
-          <a href='#'>About</a>
+          <a
+            href='/faq'
+            className={
+              router.pathname === '/faq' ? 'active' : ''
+            }
+          >
+            FAQ
+          </a>
         </li>
         <li>
-          <a href='#'>Contact</a>
+          <a
+            href='/contact'
+            className={
+              router.pathname === '/contact' ? 'active' : ''
+            }
+          >
+            Contact
+          </a>
         </li>
       </ul>
     </Nav>

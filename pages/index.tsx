@@ -3,7 +3,7 @@ import Container from 'components/Container'
 export default function Home() {
   return (
     <Container>
-      <h1>Hello world</h1>
+      <h1>Home Page</h1>
     </Container>
   )
 }

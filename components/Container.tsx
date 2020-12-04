@@ -1,11 +1,9 @@
 import styled from '@emotion/styled'
 
 const Container = styled.div`
-  width: 80vw;
+  width: 70vw;
+  background: #eeeeee;
   margin: auto;
-  margin-top: 20px;
-  background: ivory;
-  border: 1px solid red;
 `
 
 export default Container
