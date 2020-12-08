@@ -1,6 +1,7 @@
-import axios from 'axios'
 import styled from '@emotion/styled'
 import Link from 'next/link'
+import openDB from '../../openDB'
+import getMakes from 'database/getMakes'
 
 const SearchBox = styled.div`
   display: grid;
@@ -55,46 +56,82 @@ const Badge = styled.span`
   margin-right: 10px;
 `
 
-const url = process.env.NEXT_PUBLIC_BASE_URL
-
 export async function getStaticProps() {
-  const { data: cars } = await axios.get(url + '/cars')
+  const makes = await getMakes()
+  const db = await openDB()
+  const cars = await db.all(
+    'select car.id, car.make, car.model, car.year, car.fuelType, car.kilometers, car.details, car.price, car.photoUrl, group_concat(sellPoint) as tags, group_concat(hex) as colors from car join car_tag on car.id=car_tag.car_id join tag on car_tag.tag_id=tag.id group by car.id'
+  )
+  cars.forEach((car, idx, tags) => {
+    const slogans = car.tags.split(',')
+    const bgs = car.colors.split(',')
+    car.badges = []
+    for (let i = 0; i < slogans.length; i++) {
+      car.badges.push({
+        id: i + 1,
+        color: bgs[i],
+        tag: slogans[i]
+      })
+    }
+  })
+
+  console.log(cars)
+
   return {
-    props: { cars }
+    props: { cars, makes }
   }
 }
 
-const clientUrl = 'http://localhost:8000'
+// const url = 'http://localhost:8000'
 
-const Cars = ({ cars }) => {
+const Cars = ({ cars, makes }) => {
   return (
     <>
       <SearchBox>
-        <select id='make' name='make'></select>
+        <select id='make' name='make'>
+          <option value='all'>All Makes</option>
+          {makes &&
+            makes.map(make => (
+              <option value={make.make}>
+                {make.make}({make.count})
+              </option>
+            ))}
+        </select>
+        <select id='model' name='model'>
+          <option value='model'>Model</option>
+        </select>
+        <select id='minPrice' name='minPrice'>
+          <option value='minPrice'>MinPrice</option>
+        </select>
+        <select id='maxPrice' name='maxPrice'>
+          <option value='maxPrice'>MaxPrice</option>
+        </select>
       </SearchBox>
       <Grid>
         {cars &&
           cars.map(car => (
             <Link
               href={encodeURI(
-                `${clientUrl}/cars/${car.make.toLowerCase()}/${car.model.toLowerCase()}/${car.id.toString()}`
+                `/cars/${car.make.toLowerCase()}/${car.model.toLowerCase()}/${
+                  car.id
+                }`
               )}
             >
               <a>
                 <Card key={car.id}>
-                  <img src={`${url}${car.photo.url}`} />
+                  <img src={`${car.photoUrl}`} />
                   <h2>
                     {car.make} / {car.model}
                   </h2>
                   <h3>
                     {car.year} / {car.kilometers} miles
                   </h3>
-                  {car.tags &&
-                    car.tags.map(tag => (
+                  {car.badges &&
+                    car.badges.map(tag => (
                       <Badge
                         style={{ background: tag.color }}
                       >
-                        {tag.value}
+                        {tag.tag}
                       </Badge>
                     ))}
                   <h2>{car.price}</h2>

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import axios from 'axios'
+import openDB from '../openDB'
 
 const Faq = styled.div`
   width: 80vw;
@@ -47,20 +47,19 @@ const Faq = styled.div`
 `
 
 export async function getStaticProps() {
-  const { data } = await axios.get(
-    'http://localhost:800/faqs'
-  )
+  const db = await openDB()
+  const faqs = await db.all('select * from faq')
   return {
-    props: { data }
+    props: { faqs }
   }
 }
 
-const FaqPage = function ({ data }) {
+const FaqPage = function ({ faqs }) {
   return (
     <Faq>
       <h1>this is faq of this site!</h1>
-      {data &&
-        data.map(faq => (
+      {faqs &&
+        faqs.map(faq => (
           <details key={faq.id}>
             <summary>{faq.question}</summary>
             <p>{faq.answer}</p>

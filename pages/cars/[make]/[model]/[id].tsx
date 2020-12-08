@@ -1,5 +1,6 @@
 import axios from 'axios'
 import styled from '@emotion/styled'
+import openDB from 'openDB'
 
 const Card = styled.div`
   width: 90%;
@@ -19,10 +20,10 @@ const Card = styled.div`
   }
 `
 
-const url = process.env.NEXT_PUBLIC_BASE_URL
-
 export async function getStaticPaths() {
-  const { data: cars } = await axios.get(url + '/cars')
+  const db = await openDB()
+  const cars = await db.all('select * from car')
+
   const paths = cars.map(car => ({
     params: {
       make: encodeURI(car.make.toLowerCase()),
@@ -38,7 +39,11 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   const { id } = params
-  const { data: car } = await axios.get(`${url}/cars/${id}`)
+  const db = await openDB()
+  const car = await db.get(
+    'select * from car where id = ?',
+    id
+  )
   return {
     props: { car }
   }
@@ -47,7 +52,7 @@ export async function getStaticProps({ params }) {
 const CarDetails = ({ car }) => {
   return (
     <Card>
-      <img src={`${url}${car.photo.url}`} />
+      <img src={car.photoUrl} />
       <aside>
         <h2>
           {car.make}-{car.model}
