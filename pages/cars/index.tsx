@@ -1,12 +1,33 @@
 import styled from '@emotion/styled'
+import useSWR from 'swr'
+import getModels from 'database/getModels'
 import Link from 'next/link'
 import openDB from '../../openDB'
 import getMakes from 'database/getMakes'
+import {
+  Formik,
+  Form,
+  Field,
+  ErrorMessage,
+  useField
+} from 'formik'
+import * as Yup from 'yup'
+import router, { useRouter } from 'next/router'
 
 const SearchBox = styled.div`
-  display: grid;
-  width: 200px;
-  grid-template-columns: repeat(2, 1fr);
+  Form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 500px;
+    margin: auto;
+    button {
+      // grid-column-start: 1;
+      // grid-column-end: 3;
+      // grid-column: 1 / 3;
+      // grid-column: 1 / span 2;
+      grid-column: span 2;
+    }
+  }
 `
 
 const Grid = styled.div`
@@ -56,8 +77,12 @@ const Badge = styled.span`
   margin-right: 10px;
 `
 
-export async function getStaticProps() {
-  const makes = await getMakes()
+export async function getServerSideProps(context) {
+  const make = context.query.make
+  const [makes, models] = await Promise.all([
+    getMakes(),
+    getModels(make)
+  ])
   const db = await openDB()
   const cars = await db.all(
     'select car.id, car.make, car.model, car.year, car.fuelType, car.kilometers, car.details, car.price, car.photoUrl, group_concat(sellPoint) as tags, group_concat(hex) as colors from car join car_tag on car.id=car_tag.car_id join tag on car_tag.tag_id=tag.id group by car.id'
@@ -75,37 +100,104 @@ export async function getStaticProps() {
     }
   })
 
-  console.log(cars)
-
   return {
-    props: { cars, makes }
+    props: { cars, makes, models }
   }
 }
 
-// const url = 'http://localhost:8000'
+const prices = [
+  500,
+  1000,
+  5000,
+  15000,
+  25000,
+  50000,
+  250000
+]
 
-const Cars = ({ cars, makes }) => {
+const Cars = ({ cars, makes, models }) => {
+  const { query } = useRouter()
+  const initialValues = {
+    make: query.make || 'all',
+    model: query.model || 'all',
+    minPrice: query.minPrice || 'all',
+    maxPrice: query.maxPrice || 'all'
+  }
+
+  const ModelSelect = ({ make, models, ...props }) => {
+    const [field] = useField({
+      name: props.name
+    })
+
+    const { data } = useSWR('/api/models?make=' + make)
+    const newModels = data || models
+    console.log('haha', data)
+
+    return (
+      <select {...field} {...props}>
+        <option value='all'>All Models</option>
+        {newModels &&
+          newModels.map(model => (
+            <option value={model.model} key={model.model}>
+              {model.model}({model.count})
+            </option>
+          ))}
+      </select>
+    )
+  }
   return (
     <>
       <SearchBox>
-        <select id='make' name='make'>
-          <option value='all'>All Makes</option>
-          {makes &&
-            makes.map(make => (
-              <option value={make.make}>
-                {make.make}({make.count})
-              </option>
-            ))}
-        </select>
-        <select id='model' name='model'>
-          <option value='model'>Model</option>
-        </select>
-        <select id='minPrice' name='minPrice'>
-          <option value='minPrice'>MinPrice</option>
-        </select>
-        <select id='maxPrice' name='maxPrice'>
-          <option value='maxPrice'>MaxPrice</option>
-        </select>
+        <Formik
+          initialValues={initialValues}
+          onSubmit={values => {
+            router.push({
+              pathname: '/cars',
+              query: { ...values, page: 1 }
+            })
+          }}
+        >
+          {({ values }) => (
+            <Form>
+              <Field as='select' name='make'>
+                <option value='all'>All Makes</option>
+                {makes &&
+                  makes.map(make => (
+                    <option
+                      value={make.make}
+                      key={make.make}
+                    >
+                      {make.make}({make.count})
+                    </option>
+                  ))}
+              </Field>
+              <ModelSelect
+                make={values.make}
+                name='model'
+                models={models}
+              />
+              <Field as='select' name='minPrice'>
+                <option value='all'>No Min</option>
+                {prices &&
+                  prices.map(price => (
+                    <option value={price} key={price}>
+                      {price}
+                    </option>
+                  ))}
+              </Field>
+              <Field as='select' name='maxPrice'>
+                <option value='all'>No Max</option>
+                {prices &&
+                  prices.map(price => (
+                    <option value={price} key={price}>
+                      {price}
+                    </option>
+                  ))}
+              </Field>
+              <button type='submit'>Search</button>
+            </Form>
+          )}
+        </Formik>
       </SearchBox>
       <Grid>
         {cars &&
@@ -130,6 +222,7 @@ const Cars = ({ cars, makes }) => {
                     car.badges.map(tag => (
                       <Badge
                         style={{ background: tag.color }}
+                        key={tag.color}
                       >
                         {tag.tag}
                       </Badge>
