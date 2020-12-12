@@ -115,7 +115,7 @@ const prices = [
   250000
 ]
 
-const Cars = ({ cars, makes, models }) => {
+export default function Search({ cars, makes, models }) {
   const { query } = useRouter()
   const initialValues = {
     make: query.make || 'all',
@@ -131,7 +131,6 @@ const Cars = ({ cars, makes, models }) => {
 
     const { data } = useSWR('/api/models?make=' + make)
     const newModels = data || models
-    console.log('haha', data)
 
     return (
       <select {...field} {...props}>
@@ -152,7 +151,7 @@ const Cars = ({ cars, makes, models }) => {
           initialValues={initialValues}
           onSubmit={values => {
             router.push({
-              pathname: '/cars',
+              pathname: '/search',
               query: { ...values, page: 1 }
             })
           }}
@@ -237,4 +236,125 @@ const Cars = ({ cars, makes, models }) => {
   )
 }
 
-export default Cars
+// const Cars = ({ cars, makes, models }) => {
+//   const { query } = useRouter()
+//   const initialValues = {
+//     make: query.make || 'all',
+//     model: query.model || 'all',
+//     minPrice: query.minPrice || 'all',
+//     maxPrice: query.maxPrice || 'all'
+//   }
+
+//   const ModelSelect = ({ make, models, ...props }) => {
+//     const [field] = useField({
+//       name: props.name
+//     })
+
+//     const { data } = useSWR('/api/models?make=' + make)
+//     const newModels = data || models
+
+//     return (
+//       <select {...field} {...props}>
+//         <option value='all'>All Models</option>
+//         {newModels &&
+//           newModels.map(model => (
+//             <option value={model.model} key={model.model}>
+//               {model.model}({model.count})
+//             </option>
+//           ))}
+//       </select>
+//     )
+//   }
+//   return (
+//     <>
+//       <SearchBox>
+//         <Formik
+//           initialValues={initialValues}
+//           onSubmit={values => {
+//             router.push({
+//               pathname: '/search',
+//               query: { ...values, page: 1 }
+//             })
+//           }}
+//         >
+//           {({ values }) => (
+//             <Form>
+//               <Field as='select' name='make'>
+//                 <option value='all'>All Makes</option>
+//                 {makes &&
+//                   makes.map(make => (
+//                     <option
+//                       value={make.make}
+//                       key={make.make}
+//                     >
+//                       {make.make}({make.count})
+//                     </option>
+//                   ))}
+//               </Field>
+//               <ModelSelect
+//                 make={values.make}
+//                 name='model'
+//                 models={models}
+//               />
+//               <Field as='select' name='minPrice'>
+//                 <option value='all'>No Min</option>
+//                 {prices &&
+//                   prices.map(price => (
+//                     <option value={price} key={price}>
+//                       {price}
+//                     </option>
+//                   ))}
+//               </Field>
+//               <Field as='select' name='maxPrice'>
+//                 <option value='all'>No Max</option>
+//                 {prices &&
+//                   prices.map(price => (
+//                     <option value={price} key={price}>
+//                       {price}
+//                     </option>
+//                   ))}
+//               </Field>
+//               <button type='submit'>Search</button>
+//             </Form>
+//           )}
+//         </Formik>
+//       </SearchBox>
+//       <Grid>
+//         {cars &&
+//           cars.map(car => (
+//             <Link
+//               href={encodeURI(
+//                 `/cars/${car.make.toLowerCase()}/${car.model.toLowerCase()}/${
+//                   car.id
+//                 }`
+//               )}
+//             >
+//               <a>
+//                 <Card key={car.id}>
+//                   <img src={`${car.photoUrl}`} />
+//                   <h2>
+//                     {car.make} / {car.model}
+//                   </h2>
+//                   <h3>
+//                     {car.year} / {car.kilometers} miles
+//                   </h3>
+//                   {car.badges &&
+//                     car.badges.map(tag => (
+//                       <Badge
+//                         style={{ background: tag.color }}
+//                         key={tag.color}
+//                       >
+//                         {tag.tag}
+//                       </Badge>
+//                     ))}
+//                   <h2>{car.price}</h2>
+//                 </Card>
+//               </a>
+//             </Link>
+//           ))}
+//       </Grid>
+//     </>
+//   )
+// }
+
+// export default Cars

@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  list-style: none;
+  align-items: center;
+  background: #ccc;
+}
+
+.li {
+  display: inline-block;
+  margin: 10px;
+}
+.a,
+.next_a,
+.break_a {
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 50%;
+}
+
+.a_active {
+  background: orange;
+}
+.a:hover {
+  background: hotpink;
+}
+.disabled {
+  cursor: not-allowed;
+  color: lightgray;
+}
