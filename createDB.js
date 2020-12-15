@@ -7,11 +7,6 @@ const createDB = async () => {
     driver: sqlite3.Database
   })
   await db.migrate()
-
-  // const tag = await db.all('select * from tag')
-  // // console.log('all tags', JSON.stringify(tag, null, 4))
-  // // const carTag = await db.all('select * from car_tag')
-  // console.log('all car-tags', JSON.stringify(carTag, null, 4))
 }
 
 createDB()

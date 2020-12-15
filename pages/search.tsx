@@ -45,6 +45,7 @@ export default function filteredCarsList({
           )
         }}
       />
+
       <ReactPaginate
         marginPagesDisplayed={1}
         pageClassName={styles.li}
@@ -65,6 +66,7 @@ export default function filteredCarsList({
         // pageRangeDisplayed='3'
         pageRangeDisplayed={3}
       />
+
       <Search
         cars={paginatedCars}
         makes={makes}
@@ -98,6 +100,7 @@ export function PaginationLink({ item, query, ...props }) {
         pathname: '/search',
         query: { ...query, page: item.page }
       }}
+      shallow
     >
       <a {...props}></a>
     </Link>

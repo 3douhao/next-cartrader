@@ -27,7 +27,6 @@ AND (@maxPrice IS NULL OR @maxPrice >= price)
     '@minPrice': getNumValue(query.minPrice),
     '@maxPrice': getNumValue(query.maxPrice)
   }
-  console.log(query)
   const totalCarsPromise = db.get(
     `
 SELECT COUNT(*) as count FROM car ${mainQuery}
@@ -52,7 +51,6 @@ LIMIT @carsPerPage OFFSET @offset
     totalCarsPromise
   ])
 
-  console.log(totalCars)
   const totalPages = Math.ceil(
     totalCars.count / carsPerPage
   )

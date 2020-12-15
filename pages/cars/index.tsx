@@ -49,7 +49,8 @@ const Card = styled.div`
   border: 1px solid #9e9e9e;
   background: #eeeeee;
   :hover {
-    box-shadow: 4px 6px 10px rgba(0, 0, 0, 0.2);
+    // box-shadow: 2px 4px 6px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 0px 5px 10px #ccc;
     cursor: pointer;
     transform: scale(1.02);
     transition: transform 0.5;
@@ -129,7 +130,9 @@ export default function Search({ cars, makes, models }) {
       name: props.name
     })
 
-    const { data } = useSWR('/api/models?make=' + make)
+    const { data } = useSWR('/api/models?make=' + make, {
+      dedupingInterval: 60000
+    })
     const newModels = data || models
 
     return (
